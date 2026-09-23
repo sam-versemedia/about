@@ -977,16 +977,24 @@
     const wrapEl = document.getElementById('tiltWrap');
     const imgEl = document.getElementById('tiltImg');
     const bottomRowEl = document.querySelector('.hero-bottom-row');
-    const FINE_TUNE = -28; // chosen so the hair just meets the bottom of the headline
+    // Was a fixed -28px, which looked right only at the one screen width it was
+    // tuned on: the headline's font-size is clamp(64px, 14vw, 230px), so on a
+    // phone (floored near 64px) a fixed 28px pull-up eats nearly half the letters,
+    // while on desktop (up to 230px) it's barely noticeable. Scaling it to the
+    // headline's own rendered height keeps the overlap proportionally the same
+    // (hair just touching the bottom of the letters) on every screen size.
+    const FINE_TUNE_RATIO = -0.16;
 
     function positionPortrait(){
       // Reset any earlier forced height before measuring, so short/landscape
       // viewports don't get measured against a height we ourselves inflated last time.
       heroEl.style.minHeight = '';
       const heroTop = heroEl.getBoundingClientRect().top;
-      const headlineBottom = headlineEl.getBoundingClientRect().bottom;
+      const headlineRect = headlineEl.getBoundingClientRect();
+      const headlineBottom = headlineRect.bottom;
       const baseGap = headlineBottom - heroTop; // distance from hero's top to just under the headline, measured live
-      const portraitTop = baseGap + FINE_TUNE;
+      const fineTune = FINE_TUNE_RATIO * headlineRect.height;
+      const portraitTop = baseGap + fineTune;
       wrapEl.style.top = portraitTop + 'px';
 
       // On short/landscape viewports 100vh isn't tall enough to fit the headline +
